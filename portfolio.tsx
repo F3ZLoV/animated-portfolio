@@ -23,7 +23,21 @@ import {
     Moon,
     Database,
     GitBranch,
+    Award,
 } from "lucide-react"
+import { SiSpringboot } from "react-icons/si";
+import { FaJava } from "react-icons/fa";
+import { SiCplusplus } from "react-icons/si";
+import { SiReact } from "react-icons/si";
+import { SiHtml5 } from "react-icons/si";
+import { SiCss3 } from "react-icons/si";
+import { SiMysql } from "react-icons/si";
+import { SiOracle } from "react-icons/si";
+import { SiMariadb } from "react-icons/si";
+import { SiGit } from "react-icons/si";
+import { SiGithub } from "react-icons/si";
+import { SiDocker } from "react-icons/si";
+
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -37,7 +51,6 @@ export default function Component() {
     const sectionRefs = {
         home: useRef(null),
         about: useRef(null),
-        skills: useRef(null),
         projects: useRef(null),
         contact: useRef(null),
     }
@@ -71,17 +84,6 @@ export default function Component() {
             window.removeEventListener("scroll", handleScroll)
         }
     }, [])
-
-    const skills = [
-        { name: "Spring Boot", level: 90, category: "Backend" },
-        { name: "Java", level: 90, category: "Backend" },
-        { name: "MySQL", level: 85, category: "RDBMS" },
-        { name: "React", level: 70, category: "Frontend" },
-        { name: "HTML5 & CSS3", level: 80, category: "Frontend" },
-        { name: "Git/Github", level: 88, category: "DevOps" },
-        { name: "Docker", level: 60, category: "DevOps" },
-        { name: "Oracle", level: 65, category: "RDBMS" },
-    ]
 
     const projects = [
         {
@@ -122,7 +124,7 @@ export default function Component() {
         },
     ]
 
-    const navItems = ["home", "about", "skills", "projects", "contact"]
+    const navItems = ["home", "about", "projects", "contact"]
 
     if (isLoading) {
         return (
@@ -303,9 +305,9 @@ export default function Component() {
                         <div className="w-24 h-1 bg-primary mx-auto"></div>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid md:grid-cols-3 gap-8">
                         <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-                            <Card>
+                            <Card className="h-full">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <GraduationCap className="w-6 h-6 text-primary" />
@@ -327,55 +329,80 @@ export default function Component() {
                             </Card>
                         </motion.div>
 
-                        <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="space-y-6">
-                            <p className="text-lg text-muted-foreground leading-relaxed">
-                                사용자의 입장에서 생각하는 것을 중요하게 여기는 개발자 박태준입니다. Java와 Spring Boot를 사용한 백엔드 개발에 익숙하며, React와 TypeScript를 학습하여 프론트엔드 역량도 키워나가고 있습니다.
-                            </p>
-                            <p className="text-lg text-muted-foreground leading-relaxed">
-                                다양한 게임을 즐기는 것 외에도 혼자 조용한 곳에서 음악 감상하는 것도 좋아하며, 이러한 성향은 차분하게 문제 해결에 집중하는 개발 역량의 밑거름이 되었습니다.
-                            </p>
+                        <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+                            <Card className="h-full">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Award className="w-6 h-6 text-primary" />
+                                        Certification
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <h3 className="font-semibold text-lg">정보처리산업기사</h3>
+                                        <p className="text-primary">한국산업인력공단</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2023.06</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                            <Card className="h-full">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Code className="w-6 h-6 text-primary" />
+                                        Skills & Tools
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <h3 className="font-semibold text-lg">Backend</h3>
+                                        <div className="flex flex-wrap gap-4 mt-2 text-2xl">
+                                            <SiSpringboot title="Spring Boot" />
+                                            <FaJava title="Java" />
+                                            <SiCplusplus title="C++" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">Frontend</h3>
+                                        <div className="flex flex-wrap gap-4 mt-2 text-2xl">
+                                            <SiReact title="React" />
+                                            <SiHtml5 title="HTML5" />
+                                            <SiCss3 title="CSS3" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">RDBMS</h3>
+                                        <div className="flex flex-wrap gap-4 mt-2 text-2xl">
+                                            <SiMysql title="MySQL" />
+                                            <SiOracle title="Oracle" />
+                                            <SiMariadb title="MariaDB" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">DevOps</h3>
+                                        <div className="flex flex-wrap gap-4 mt-2 text-2xl">
+                                            <SiGit title="Git" />
+                                            <SiGithub title="GitHub" />
+                                            <SiDocker title="Docker" />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </motion.div>
                     </div>
-                </div>
-            </section>
 
-            <section id="skills" ref={sectionRefs.skills} className="py-32 px-4 bg-secondary">
-                <div className="container mx-auto">
-                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Skills & Tools</h2>
-                        <div className="w-24 h-1 bg-primary mx-auto"></div>
+                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-12">
+                        <p className="text-lg text-muted-foreground leading-relaxed text-center max-w-4xl mx-auto">
+                            사용자의 입장에서 생각하는 것을 중요하게 여기는 개발자 박태준입니다. Java와 Spring Boot를 사용한 백엔드 개발에 익숙하며, React와 TypeScript를 학습하여 프론트엔드 역량도 키워나가고 있습니다.
+                            다양한 게임을 즐기는 것 외에도 혼자 조용한 곳에서 음악 감상하는 것도 좋아하며, 이러한 성향은 차분하게 문제 해결에 집중하는 개발 역량의 밑거름이 되었습니다.
+                        </p>
                     </motion.div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><Server className="w-6 h-6 text-primary" />Backend</CardTitle></CardHeader>
-                            <CardContent className="flex flex-wrap gap-2">
-                                <Badge>Spring Boot</Badge><Badge>Java</Badge><Badge>C/C++</Badge>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><Code className="w-6 h-6 text-primary" />Frontend</CardTitle></CardHeader>
-                            <CardContent className="flex flex-wrap gap-2">
-                                <Badge>React</Badge><Badge>HTML5</Badge><Badge>CSS3</Badge>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><Database className="w-6 h-6 text-primary" />RDBMS</CardTitle></CardHeader>
-                            <CardContent className="flex flex-wrap gap-2">
-                                <Badge>MySQL</Badge><Badge>Oracle</Badge><Badge>MariaDB</Badge>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader><CardTitle className="flex items-center gap-2"><GitBranch className="w-6 h-6 text-primary" />DevOps</CardTitle></CardHeader>
-                            <CardContent className="flex flex-wrap gap-2">
-                                <Badge>Git/Github</Badge><Badge>Docker</Badge>
-                            </CardContent>
-                        </Card>
-                    </div>
                 </div>
             </section>
 
-            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4">
+            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4 bg-secondary">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Projects</h2>
@@ -421,7 +448,7 @@ export default function Component() {
                 </div>
             </section>
 
-            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4 bg-secondary">
+            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Get In Touch</h2>
