@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: '/<repository-name>',
+  basePath: '/animated-portfolio',
   eslint: {
     ignoreDuringBuilds: true,
   },
