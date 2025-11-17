@@ -1,9 +1,11 @@
+// f3zlov/animated-portfolio/animated-portfolio-864d619338c7277635686af28ce7bad9c25a93a6/app/layout.tsx
+
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import { ThemeProvider } from "@/components/theme-provider" // 1. ThemeProvider 임포트
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
     title: 'Portfolio',
@@ -17,18 +19,20 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        // 1. className에 폰트 변수를 추가합니다.
+        <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
         <head>
-            <style>{`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-        `}</style>
+            {/* 2. 이 <style> 태그를 완전히 삭제합니다. */}
+            {/* <style>{`
+            html {
+              font-family: ${GeistSans.style.fontFamily};
+              --font-sans: ${GeistSans.variable};
+              --font-mono: ${GeistMono.variable};
+            }
+            `}</style>
+            */}
         </head>
         <body>
-        {/* 2. {children}을 ThemeProvider로 감싸기 */}
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

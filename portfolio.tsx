@@ -47,13 +47,17 @@ export default function Component() {
     const { scrollYProgress } = useScroll()
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
 
+    // [수정 1] useRef에 HTMLElement 타입을 명시합니다.
     const sectionRefs = {
-        home: useRef(null),
-        info: useRef(null),
-        about: useRef(null),
-        projects: useRef(null),
-        contact: useRef(null),
+        home: useRef<HTMLElement>(null),
+        info: useRef<HTMLElement>(null),
+        about: useRef<HTMLElement>(null),
+        projects: useRef<HTMLElement>(null),
+        contact: useRef<HTMLElement>(null),
     }
+
+    // [수정 1] sectionRefs의 키를 기반으로 타입을 정의합니다.
+    type SectionId = keyof typeof sectionRefs;
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -63,27 +67,38 @@ export default function Component() {
         return () => clearTimeout(timer)
     }, [])
 
+    // [수정 2] 스크롤 이벤트 핸들러 로직을 수정합니다.
     useEffect(() => {
         const handleScroll = () => {
+            // 페이지 맨 아래에 도달했는지 확인 (10px 여유)
+            const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+
+            if (isAtBottom) {
+                setActiveSection("contact"); // 맨 아래면 'contact'로 강제 설정
+                return;
+            }
+
             const scrollPosition = window.scrollY + 100
-            const sections = ["home", "info", "about", "projects", "contact"];
+            const sections: SectionId[] = ["home", "info", "about", "projects", "contact"];
+            let currentSection: SectionId = "home"; // 기본값
+
             for (const section of sections) {
                 const element = sectionRefs[section].current
-                if (element) {
-                    const { offsetTop, offsetHeight } = element
-                    if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-                        setActiveSection(section)
-                        break
-                    }
+                if (element && scrollPosition >= element.offsetTop) {
+                    currentSection = section; // 스크롤 위치가 섹션의 시작점보다 크거나 같으면 이 섹션으로 업데이트
+                } else {
+                    // 다음 섹션은 아직 스크롤 위치에 도달하지 않았으므로 중단
+                    break;
                 }
             }
+            setActiveSection(currentSection);
         }
 
         window.addEventListener("scroll", handleScroll)
         return () => {
             window.removeEventListener("scroll", handleScroll)
         }
-    }, [])
+    }, []) // 의존성 배열은 기존대로 비워둡니다.
 
     // PDF 내보내기 함수
     const handleExportPdf = async () => {
@@ -221,7 +236,8 @@ export default function Component() {
                                             activeSection === item ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                                         } transition-colors`}
                                     >
-                                        {item === 'info' ? 'About' : item}
+                                        {/* [수정 3] 'info'를 'Skills'로 변경 */}
+                                        {item === 'info' ? 'Skills' : item}
                                         {activeSection === item && (
                                             <motion.div layoutId="activeSection" className="h-0.5 bg-primary mt-1 rounded-full" />
                                         )}
@@ -364,7 +380,8 @@ export default function Component() {
             <section id="info" ref={sectionRefs.info} className="py-32 px-4">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">About</h2>
+                        {/* [수정 4] h2 태그 수정 */}
+                        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Skills & Info</h2>
                         <div className="w-24 h-1 bg-primary mx-auto"></div>
                     </motion.div>
 
@@ -409,14 +426,19 @@ export default function Component() {
                                         <p className="text-sm text-muted-foreground mt-1">2025.12</p>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-lg">정보처리기사</h3>
-                                        <p className="text-primary">한국산업인력공단</p>
+                                        <h3 className="font-semibold text-lg">리눅스 마스터 2급</h3>
+                                        <p className="text-primary">KAIT 검정</p>
                                         <p className="text-sm text-muted-foreground mt-1">2026.03</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">AWS Cloud Practional</h3>
+                                        <p className="text-primary">Amazon AWS</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2026.04</p>
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg">AWS Cloud Associate</h3>
                                         <p className="text-primary">Amazon AWS</p>
-                                        <p className="text-sm text-muted-foreground mt-1">2026.04</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2026.06</p>
                                     </div>
                                 </CardContent>
                             </Card>
