@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { motion, useScroll, useSpring } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,20 +10,16 @@ import Image from "next/image";
 import {
     Github,
     Mail,
-    Server,
     Code,
     GraduationCap,
-    MapPin,
-    Calendar,
     ChevronDown,
     Menu,
     X,
     ArrowRight,
     Sun,
     Moon,
-    Database,
-    GitBranch,
     Award,
+    FileText, // PDF 아이콘 추가
 } from "lucide-react"
 import { SiSpringboot } from "react-icons/si";
 import { FaJava } from "react-icons/fa";
@@ -37,6 +33,8 @@ import { SiMariadb } from "react-icons/si";
 import { SiGit } from "react-icons/si";
 import { SiGithub } from "react-icons/si";
 import { SiDocker } from "react-icons/si";
+import jsPDF from 'jspdf'; // jspdf import
+import html2canvas from 'html2canvas'; // html2canvas import
 
 
 export default function Component() {
@@ -44,12 +42,14 @@ export default function Component() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [activeSection, setActiveSection] = useState("home")
     const [isLoading, setIsLoading] = useState(true)
+    const portfolioRef = useRef<HTMLDivElement>(null); // 전체 포트폴리오 div를 위한 ref 추가
 
     const { scrollYProgress } = useScroll()
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
 
     const sectionRefs = {
         home: useRef(null),
+        info: useRef(null),
         about: useRef(null),
         projects: useRef(null),
         contact: useRef(null),
@@ -66,8 +66,8 @@ export default function Component() {
     useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY + 100
-
-            for (const section in sectionRefs) {
+            const sections = ["home", "info", "about", "projects", "contact"];
+            for (const section of sections) {
                 const element = sectionRefs[section].current
                 if (element) {
                     const { offsetTop, offsetHeight } = element
@@ -84,6 +84,53 @@ export default function Component() {
             window.removeEventListener("scroll", handleScroll)
         }
     }, [])
+
+    // PDF 내보내기 함수
+    const handleExportPdf = async () => {
+        const element = portfolioRef.current;
+        if (!element) return;
+
+        // PDF 생성 전 스크롤바 숨기기 등 스타일 조정 (선택 사항)
+        const originalStyle = element.style.overflow;
+        element.style.overflow = 'visible'; // 전체 콘텐츠가 보이도록
+
+        const canvas = await html2canvas(element, {
+            scale: 2, // 해상도 향상
+            useCORS: true, // 외부 이미지 로드 허용
+            scrollY: -window.scrollY // 현재 스크롤 위치 반영
+        });
+
+        // 스타일 복원
+        element.style.overflow = originalStyle;
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4'); // A4 용지, 세로 방향
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = imgProps.width;
+        const imgHeight = imgProps.height;
+
+        // 이미지 비율 계산
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+        // 이미지 크기 및 위치 계산 (가운데 정렬)
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        // const imgY = (pdfHeight - imgHeight * ratio) / 2; // 세로 가운데 정렬 시 사용
+        const imgY = 0; // 페이지 상단부터 시작
+
+        // 페이지 크기에 맞춰 이미지 높이 계산
+        const scaledHeight = imgHeight * ratio;
+
+        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, scaledHeight);
+        pdf.save('portfolio.pdf');
+
+        // 새 탭에서 PDF 열기 (Blob URL 사용)
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+        URL.revokeObjectURL(pdfUrl); // 메모리 해제
+    };
 
     const projects = [
         {
@@ -118,13 +165,13 @@ export default function Component() {
             description:
                 "Java Window Programming을 이용한 간단한 은행 계좌 관리 프로그램입니다. 계좌 생성 및 관리, 잔액 조회, 입출금 기능을 구현했습니다.",
             tech: ["Java", "MySQL", "WindowBuilder"],
-            image: "/images/bank_accound.png",
+            image: "/images/bank_account.png",
             github: "https://github.com/F3ZLoV/BankAccountManage-WindowApp",
             notion: "notion.so/1e9a55bf89ae80ce9578d1eb6b9dfd1b?pvs=74",
         },
     ]
 
-    const navItems = ["home", "about", "projects", "contact"]
+    const navItems = ["home", "info", "about", "projects", "contact"]
 
     if (isLoading) {
         return (
@@ -145,7 +192,8 @@ export default function Component() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground overflow-hidden">
+        // 전체 컨텐츠를 portfolioRef로 감싸줍니다.
+        <div ref={portfolioRef} className="min-h-screen bg-background text-foreground overflow-x-hidden"> {/* overflow-x-hidden 추가 */}
             <motion.div
                 className="fixed top-0 left-0 right-0 h-1 bg-primary z-50"
                 style={{ scaleX, transformOrigin: "0%" }}
@@ -173,7 +221,7 @@ export default function Component() {
                                             activeSection === item ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                                         } transition-colors`}
                                     >
-                                        {item}
+                                        {item === 'info' ? 'About' : item}
                                         {activeSection === item && (
                                             <motion.div layoutId="activeSection" className="h-0.5 bg-primary mt-1 rounded-full" />
                                         )}
@@ -181,6 +229,7 @@ export default function Component() {
                                 ))}
                             </div>
 
+                            {/* 다크모드 버튼 */}
                             <Button
                                 variant="outline"
                                 size="icon"
@@ -192,6 +241,18 @@ export default function Component() {
                                 <span className="sr-only">Toggle theme</span>
                             </Button>
 
+                            {/* PDF 내보내기 버튼 */}
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="hidden md:inline-flex rounded-full bg-background/50 border-border"
+                                onClick={handleExportPdf}
+                                title="Export as PDF"
+                            >
+                                <FileText className="h-[1.2rem] w-[1.2rem]" />
+                                <span className="sr-only">Export as PDF</span>
+                            </Button>
+
                             <button className="md:hidden text-foreground p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                                 {isMenuOpen ? <X /> : <Menu />}
                             </button>
@@ -200,6 +261,7 @@ export default function Component() {
                 </div>
             </motion.nav>
 
+            {/* Home Section */}
             <section id="home" ref={sectionRefs.home} className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(128,128,128,0.1),rgba(0,0,0,0)_50%)]" />
@@ -298,14 +360,16 @@ export default function Component() {
                 </div>
             </section>
 
-            <section id="about" ref={sectionRefs.about} className="py-32 px-4">
+            {/* Info Section (Education, Certification, Skills & Tools) */}
+            <section id="info" ref={sectionRefs.info} className="py-32 px-4">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">About Me</h2>
+                        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">About</h2>
                         <div className="w-24 h-1 bg-primary mx-auto"></div>
                     </motion.div>
 
                     <div className="grid md:grid-cols-3 gap-8">
+                        {/* Education Card */}
                         <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
                             <Card className="h-full">
                                 <CardHeader>
@@ -329,6 +393,7 @@ export default function Component() {
                             </Card>
                         </motion.div>
 
+                        {/* Certification Card */}
                         <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
                             <Card className="h-full">
                                 <CardHeader>
@@ -341,12 +406,23 @@ export default function Component() {
                                     <div>
                                         <h3 className="font-semibold text-lg">정보처리산업기사</h3>
                                         <p className="text-primary">한국산업인력공단</p>
-                                        <p className="text-sm text-muted-foreground mt-1">2023.06</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2025.12</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">정보처리기사</h3>
+                                        <p className="text-primary">한국산업인력공단</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2026.03</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">AWS Cloud Associate</h3>
+                                        <p className="text-primary">Amazon AWS</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2026.04</p>
                                     </div>
                                 </CardContent>
                             </Card>
                         </motion.div>
 
+                        {/* Skills & Tools Card */}
                         <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                             <Card className="h-full">
                                 <CardHeader>
@@ -359,50 +435,106 @@ export default function Component() {
                                     <div>
                                         <h3 className="font-semibold text-lg">Backend</h3>
                                         <div className="flex flex-wrap gap-4 mt-2 text-2xl">
-                                            <SiSpringboot title="Spring Boot" />
-                                            <FaJava title="Java" />
-                                            <SiCplusplus title="C++" />
+                                            {/* 각 아이콘을 div로 감싸고 텍스트 추가 */}
+                                            <div className="flex flex-col items-center">
+                                                <SiSpringboot title="Spring Boot" />
+                                                <span className="text-xs mt-1">Spring Boot</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <FaJava title="Java" />
+                                                <span className="text-xs mt-1">Java</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiCplusplus title="C++" />
+                                                <span className="text-xs mt-1">C++</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg">Frontend</h3>
                                         <div className="flex flex-wrap gap-4 mt-2 text-2xl">
-                                            <SiReact title="React" />
-                                            <SiHtml5 title="HTML5" />
-                                            <SiCss3 title="CSS3" />
+                                            <div className="flex flex-col items-center">
+                                                <SiReact title="React" />
+                                                <span className="text-xs mt-1">React</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiHtml5 title="HTML5" />
+                                                <span className="text-xs mt-1">HTML5</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiCss3 title="CSS3" />
+                                                <span className="text-xs mt-1">CSS3</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg">RDBMS</h3>
                                         <div className="flex flex-wrap gap-4 mt-2 text-2xl">
-                                            <SiMysql title="MySQL" />
-                                            <SiOracle title="Oracle" />
-                                            <SiMariadb title="MariaDB" />
+                                            <div className="flex flex-col items-center">
+                                                <SiMysql title="MySQL" />
+                                                <span className="text-xs mt-1">MySQL</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiOracle title="Oracle" />
+                                                <span className="text-xs mt-1">Oracle</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiMariadb title="MariaDB" />
+                                                <span className="text-xs mt-1">MariaDB</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg">DevOps</h3>
                                         <div className="flex flex-wrap gap-4 mt-2 text-2xl">
-                                            <SiGit title="Git" />
-                                            <SiGithub title="GitHub" />
-                                            <SiDocker title="Docker" />
+                                            <div className="flex flex-col items-center">
+                                                <SiGit title="Git" />
+                                                <span className="text-xs mt-1">Git</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiGithub title="GitHub" />
+                                                <span className="text-xs mt-1">GitHub</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <SiDocker title="Docker" />
+                                                <span className="text-xs mt-1">Docker</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
                         </motion.div>
                     </div>
+                </div>
+            </section>
 
-                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-12">
-                        <p className="text-lg text-muted-foreground leading-relaxed text-center max-w-4xl mx-auto">
-                            사용자의 입장에서 생각하는 것을 중요하게 여기는 개발자 박태준입니다. Java와 Spring Boot를 사용한 백엔드 개발에 익숙하며, React와 TypeScript를 학습하여 프론트엔드 역량도 키워나가고 있습니다.
-                            다양한 게임을 즐기는 것 외에도 혼자 조용한 곳에서 음악 감상하는 것도 좋아하며, 이러한 성향은 차분하게 문제 해결에 집중하는 개발 역량의 밑거름이 되었습니다.
+            {/* New About Me Section */}
+            <section id="about" ref={sectionRefs.about} className="py-32 px-4 bg-secondary">
+                <div className="container mx-auto max-w-4xl">
+                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
+                        <h3 className="text-3xl font-bold text-foreground mb-4">나의 여정</h3>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            저는 컴퓨터 게임을 위한 도구 제작에 빠져있던 고등학교 2학년 때 친구와 함께 UNIST에서 진행하는 슈퍼컴퓨팅 청소년 캠프에 참가한 것을 계기로 프로그래밍의 방향을 바꾸게 되었습니다. 4박 5일간의 짧은 시간이었지만 수준 높은 실습과 특강 등 다양한 활동 속에서 프로그래밍이라는 세계에 매료되었고, '내가 만든 프로그램이 직접 동작한다'는 경험에 큰 흥미를 느꼈습니다. 당시에는 프로그래밍에 대한 확신이나 별다른 비전이 없었지만, 이후 여러 전공을 선택할까 하다가 이 경험이 떠올라 컴퓨터공학 전공을 선택하게 되었습니다.
+                            대학에서는 컴퓨터 구조, 운영체제, 네트워크 등 전공 이론과 함께 다양한 팀/개인 프로젝트를 진행하며 실력을 쌓았고, 문서 작성과 협업 경험을 통해 문제 해결 중심의 사고 방식과 실무 역량을 키워나갔습니다.
+                        </p>
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="mb-12">
+                        <h3 className="text-3xl font-bold text-foreground mb-4">기술과 도전</h3>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            '모르는 것을 두려워하지 않는 개발자'가 되고 싶습니다. 3학년 1학기에 병원 EMR 시스템 개발 개인 프로젝트를 진행하며 Java 스킬만으로는 부족함을 느꼈고, Spring에 대해서는 전혀 모르는 상태였습니다. 그러나 병원 업무 시스템 구현을 위해 백엔드 프레임워크가 필요했고, 결국 Spring Boot의 기본부터 하나하나 독학해나가며 시스템을 직접 구축해보았습니다. 처음에는 REST API 설계조차 생소했지만, 관련 강의와 공식 문서를 참고해가며 기능을 기초부터 직접 구현했습니다. 결과적으로 데이터베이스 연동부터 병원 예약 처리, 진료 이력 관리 등 하나의 시스템을 만들어 볼 수 있었고, 이 과정에서 개발의 재미를 다시 한번 체감했습니다. 이런 경험을 토대로 앞으로 모르는 것에 어렵고 두려워 않고 모자란 점을 고치고 채워나가는 사람이 되어 나갈 것입니다.
+                        </p>
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+                        <h3 className="text-3xl font-bold text-foreground mb-4">미래로의 도약</h3>
+                        <p className="text-lg text-muted-foreground leading-relaxed">
+                            저는 대학에서의 다양한 강의와 과제 활동, 프로젝트를 통해 실제 실무에서 필요한 기초 역량을 쌓는 귀중한 경험을 하였습니다. 이러한 경험들은 개발자로서의 토대를 다지는 데 큰 도움이 되었지만, 동시에 아직 배워야 할 것이 많다는 사실도 깨달았습니다. 앞으로는 직접 현장에서 부딪혀 보면서 부족한 점을 스스로 파악하고, 실패를 두려워하지 않고 그 속에서 교훈을 얻으며 성장해 나가고 싶습니다. 단순히 빠른 결과만을 추구하기보다, 시행착오를 겪고 스스로 고민하며 해결해나가는 과정의 나의 소중한 자산이라 여기며 한 걸음씩 전진할 것입니다.
                         </p>
                     </motion.div>
                 </div>
             </section>
 
-            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4 bg-secondary">
+            {/* Projects Section */}
+            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4"> {/* Removed bg-secondary */}
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Projects</h2>
@@ -448,7 +580,8 @@ export default function Component() {
                 </div>
             </section>
 
-            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4">
+            {/* Contact Section */}
+            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4 bg-secondary"> {/* Added bg-secondary */}
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Get In Touch</h2>
