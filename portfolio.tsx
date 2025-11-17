@@ -302,7 +302,13 @@ export default function Component() {
                         />
                         <div className="absolute inset-8 rounded-full bg-primary/10 p-1">
                             <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center overflow-hidden">
-                                <img src="/images/hamter.png" alt="박태준 프로필" className="w-full h-full object-cover rounded-full" />
+                                <Image
+                                    src="/images/hamter.png"
+                                    alt="박태준 프로필"
+                                    className="w-full h-full object-cover rounded-full"
+                                    width={200}
+                                    height={200}
+                                />
                             </div>
                         </div>
                     </motion.div>
@@ -568,7 +574,13 @@ export default function Component() {
                             <motion.div key={index} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.2 }}>
                                 <Card className="h-full flex flex-col">
                                     <div className="relative overflow-hidden h-56 bg-muted">
-                                        <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                                        <Image
+                                            src={project.image}
+                                            alt={project.title}
+                                            className="w-full h-full object-cover"
+                                            width={500}
+                                            height={224}
+                                        />
                                     </div>
                                     <CardHeader>
                                         <div className="flex justify-between items-start">
