@@ -41,7 +41,7 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
-import profileImage from './public/images/profile.jpeg';
+import profileImage from './public/images/profile.jpg';
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
