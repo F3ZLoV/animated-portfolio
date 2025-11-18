@@ -24,18 +24,14 @@ import {
     MapPin,
     ExternalLink
 } from "lucide-react"
-import { SiSpringboot } from "react-icons/si";
+
+// 아이콘 라이브러리
+import {
+    SiSpringboot, SiReact, SiHtml5, SiCss3, SiMysql, SiOracle,
+    SiMariadb, SiGit, SiGithub, SiDocker, SiAmazonaws, SiCplusplus
+} from "react-icons/si";
 import { FaJava, FaAws } from "react-icons/fa";
-import { SiCplusplus } from "react-icons/si";
-import { SiReact } from "react-icons/si";
-import { SiHtml5 } from "react-icons/si";
-import { SiCss3 } from "react-icons/si";
-import { SiMysql } from "react-icons/si";
-import { SiOracle } from "react-icons/si";
-import { SiMariadb } from "react-icons/si";
-import { SiGit } from "react-icons/si";
-import { SiGithub } from "react-icons/si";
-import { SiDocker } from "react-icons/si";
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -46,7 +42,6 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
-import profileImage from './public/images/profile.jpeg'; // 프로필 사진 (필요시 변경)
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -95,11 +90,9 @@ export default function Component() {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
-    // PDF 내보내기 함수 (A4 규격 페이지 타겟팅)
+    // PDF 새 탭에서 열기 및 인쇄 유도
     const handleExportPdf = async () => {
-        // PDF로 내보낼 섹션 정의 (Home과 About만 이력서 형식이므로 이 둘만 PDF로 추출)
         const targetSections: SectionId[] = ["home", "about"];
-
         setIsExporting(true);
 
         try {
@@ -109,20 +102,17 @@ export default function Component() {
 
             for (let i = 0; i < targetSections.length; i++) {
                 const sectionKey = targetSections[i];
-                // A4 컨테이너를 찾음 (section 내부의 첫번째 div)
                 const element = sectionRefs[sectionKey].current?.querySelector('.a4-page') as HTMLElement;
 
                 if (element) {
                     const canvas = await html2canvas(element, {
-                        scale: 2, // 선명도를 위해 2배율
+                        scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: '#ffffff' // 배경 흰색 고정
+                        backgroundColor: '#ffffff'
                     });
 
                     const imgData = canvas.toDataURL('image/png');
-
-                    // PDF 페이지에 꽉 차게 이미지 추가
                     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
                     if (i < targetSections.length - 1) {
@@ -131,7 +121,11 @@ export default function Component() {
                 }
             }
 
-            pdf.save('Park_Taejoon_Resume.pdf');
+            // [수정] 다운로드 대신 새 탭에서 열고 인쇄 대화상자 띄우기
+            pdf.autoPrint(); // 인쇄 설정 추가
+            const blob = pdf.output('blob');
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank'); // 새 탭 열기
 
         } catch (error) {
             console.error("PDF extraction failed:", error);
@@ -194,15 +188,31 @@ export default function Component() {
         <div ref={portfolioRef} className="min-h-screen bg-secondary/30 text-foreground overflow-x-hidden font-sans">
             <motion.div className="fixed top-0 left-0 right-0 h-1 bg-primary z-50" style={{ scaleX, transformOrigin: "0%" }} />
 
+            {/* Navigation Bar */}
             <motion.nav initial={{ y: -100 }} animate={{ y: 0 }} className="fixed top-0 w-full z-40 bg-background/80 backdrop-blur-md border-b border-border/40 shadow-sm">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div className="text-xl font-bold text-primary">Tae-joon's Resume</div>
                     <div className="flex items-center gap-4">
                         <div className="hidden md:flex space-x-6 text-sm font-medium">
                             {navItems.map((item) => (
-                                <a key={item} href={`#${item}`} className={`capitalize hover:text-primary transition-colors ${activeSection === item ? "text-primary" : "text-muted-foreground"}`}>
-                                    {item}
-                                </a>
+                                <div key={item} className="relative">
+                                    <a
+                                        href={`#${item}`}
+                                        className={`capitalize transition-colors hover:text-primary ${
+                                            activeSection === item ? "text-primary" : "text-muted-foreground"
+                                        }`}
+                                    >
+                                        {item}
+                                    </a>
+                                    {/* [수정] Nav 밑줄 애니메이션 복구 */}
+                                    {activeSection === item && (
+                                        <motion.div
+                                            layoutId="activeSection"
+                                            className="absolute -bottom-[1.2rem] left-0 right-0 h-0.5 bg-primary rounded-full"
+                                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                        />
+                                    )}
+                                </div>
                             ))}
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
@@ -211,7 +221,7 @@ export default function Component() {
                         </Button>
                         <Button size="sm" onClick={handleExportPdf} disabled={isExporting} className="gap-2">
                             {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-                            {isExporting ? "Saving..." : "Save as PDF"}
+                            {isExporting ? "Generating..." : "Print / Save PDF"}
                         </Button>
                         <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                             {isMenuOpen ? <X /> : <Menu />}
@@ -221,9 +231,9 @@ export default function Component() {
             </motion.nav>
 
             {/* --- PAGE 1: HOME (Resume Style) --- */}
-            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
-                {/* A4 규격 컨테이너 (210mm x 297mm ~ 794px x 1123px) */}
-                <div className="a4-page bg-white text-slate-900 shadow-2xl p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden">
+            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4 bg-gray-100/50">
+                {/* [수정] 그림자/테두리 제거 (shadow-none, border-none) */}
+                <div className="a4-page bg-white text-slate-900 p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
 
                     {/* 1. Header & Contact */}
                     <div className="flex items-center justify-between border-b-2 border-slate-900 pb-6">
@@ -237,9 +247,7 @@ export default function Component() {
                                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> 인천시 서구</div>
                             </div>
                         </div>
-                        {/* Profile Image (Circle Cropped) */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-slate-100 shadow-inner relative">
-                            {/* hamterImage 대신 profileImage 등 사용 가능 */}
                             <Image src={hamterImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
@@ -257,20 +265,24 @@ export default function Component() {
                     {/* 3. Main Content Grid (50:50 Split) */}
                     <div className="grid grid-cols-2 gap-10 flex-grow">
 
-                        {/* Left Column: Education & Certification */}
+                        {/* Left Column */}
                         <div className="space-y-8">
-                            {/* Education */}
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Education</h2>
                                 <div className="space-y-4">
-                                    <div className="relative pl-4 border-l border-slate-300">
-                                        <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-slate-400"></div>
+                                    <div className="relative pl-4 border-l-2 border-slate-200">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
+                                        <h3 className="font-bold text-base">가좌고등학교</h3>
+                                        <p className="text-xs text-slate-500">~ 2020.02</p>
+                                    </div>
+                                    <div className="relative pl-4 border-l-2 border-slate-200">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
                                         <h3 className="font-bold text-base">인하공업전문대학</h3>
                                         <p className="text-sm font-medium text-slate-700">컴퓨터정보과 (공학사)</p>
                                         <p className="text-xs text-slate-500">2026.03 ~ 2027.02 (예정)</p>
                                     </div>
-                                    <div className="relative pl-4 border-l border-slate-300">
-                                        <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-slate-400"></div>
+                                    <div className="relative pl-4 border-l-2 border-slate-200">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
                                         <h3 className="font-bold text-base">인하공업전문대학</h3>
                                         <p className="text-sm font-medium text-slate-700">컴퓨터정보과 (전문학사)</p>
                                         <p className="text-xs text-slate-500">2020.03 ~ 2026.02</p>
@@ -278,23 +290,22 @@ export default function Component() {
                                 </div>
                             </div>
 
-                            {/* Certification */}
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Certification</h2>
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex justify-between">
+                                <div className="space-y-3 text-sm border-t border-slate-100 pt-2">
+                                    <div className="flex justify-between border-b border-slate-50 pb-1">
                                         <span className="font-semibold">정보처리산업기사</span>
                                         <span className="text-slate-500">2025.12</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between border-b border-slate-50 pb-1">
                                         <span className="font-semibold">리눅스 마스터 2급</span>
                                         <span className="text-slate-500">2026.03</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between border-b border-slate-50 pb-1">
                                         <span className="font-semibold">AWS Cloud Practitioner</span>
                                         <span className="text-slate-500">2026.04</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between border-b border-slate-50 pb-1">
                                         <span className="font-semibold">AWS Solution Associate</span>
                                         <span className="text-slate-500">2026.08</span>
                                     </div>
@@ -302,58 +313,76 @@ export default function Component() {
                             </div>
                         </div>
 
-                        {/* Right Column: Skills & Tools */}
+                        {/* Right Column: Skills & Tools - [수정] 개별 아이콘 적용 */}
                         <div className="space-y-8">
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Skills & Tools</h2>
 
-                                <div className="space-y-6">
+                                <div className="space-y-5">
                                     {/* Backend */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                            <SiSpringboot className="text-green-600"/> Backend
-                                        </h3>
+                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Backend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">Java</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">Spring Boot</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">C++</Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <FaJava className="text-red-500 text-base"/> Java
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiSpringboot className="text-green-600 text-base"/> Spring Boot
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiCplusplus className="text-blue-700 text-base"/> C++
+                                            </Badge>
                                         </div>
                                     </div>
 
                                     {/* Frontend */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                            <SiReact className="text-blue-500"/> Frontend
-                                        </h3>
+                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Frontend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">React</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">HTML5</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">CSS3</Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiReact className="text-blue-400 text-base"/> React
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiHtml5 className="text-orange-600 text-base"/> HTML5
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiCss3 className="text-blue-600 text-base"/> CSS3
+                                            </Badge>
                                         </div>
                                     </div>
 
                                     {/* Database */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                            <SiMysql className="text-blue-600"/> Database
-                                        </h3>
+                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Database</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">MySQL</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">Oracle</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">MariaDB</Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiMysql className="text-blue-600 text-base"/> MySQL
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiOracle className="text-red-600 text-base"/> Oracle
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiMariadb className="text-brown-600 text-base"/> MariaDB
+                                            </Badge>
                                         </div>
                                     </div>
 
                                     {/* DevOps */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                            <FaAws className="text-orange-500"/> DevOps
-                                        </h3>
+                                        <h3 className="text-sm font-bold text-slate-700 mb-2">DevOps</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">AWS</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">Docker</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">Git</Badge>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200">GitHub</Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <FaAws className="text-orange-500 text-base"/> AWS
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiDocker className="text-blue-500 text-base"/> Docker
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiGit className="text-red-500 text-base"/> Git
+                                            </Badge>
+                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                                <SiGithub className="text-black text-base"/> GitHub
+                                            </Badge>
                                         </div>
                                     </div>
                                 </div>
@@ -364,9 +393,9 @@ export default function Component() {
             </section>
 
             {/* --- PAGE 2: ABOUT (Resume Page 2) --- */}
-            <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4">
-                {/* A4 규격 컨테이너 */}
-                <div className="a4-page bg-white text-slate-900 shadow-2xl p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden">
+            <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4 bg-gray-100/50">
+                {/* [수정] 그림자/테두리 제거 */}
+                <div className="a4-page bg-white text-slate-900 p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
 
                     <div className="border-b pb-4">
                         <h2 className="text-3xl font-bold text-slate-900">About Me</h2>
