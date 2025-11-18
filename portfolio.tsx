@@ -36,6 +36,13 @@ import { SiDocker } from "react-icons/si";
 import jsPDF from 'jspdf'; // jspdf import
 import html2canvas from 'html2canvas'; // html2canvas import
 
+import hamterImage from './public/images/hamter.png';
+import lostarkImage from './public/images/lostark1.png';
+import emrImage from './public/images/EMR.png';
+import commuImage from './public/images/commu.png';
+import bankImage from './public/images/bank_account.png';
+import notionImage from './public/images/notion.png';
+
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -153,7 +160,7 @@ export default function Component() {
             description:
                 "국내 MMORPG 로스트아크에서 제공하는 API를 이용해 개인 원정대 모든 캐릭터 레벨을 불러와서 상위 6개 캐릭터 레벨별 알맞은 레이드 종류를 자동으로 매칭해서 관리 폼을 만들어주는 웹페이지입니다.",
             tech: ["JSP/Servlet", "HTML", "Bootstrap", "MySQL"],
-            image: "/images/lostark1.png",
+            image: lostarkImage,
             github: "https://github.com/F3ZLoV/LostArkRaidManager",
             notion: "https://www.notion.so/1e9a55bf89ae807b81e4d9b702e49169?v=1e9a55bf89ae805086c1000c4ce3ab41&pvs=74&cookie_sync_completed=true",
         },
@@ -162,7 +169,7 @@ export default function Component() {
             description:
                 "Spring Boot와 Thymeleaf 기반의 병원 의료 정보 시스템(EMR)입니다. 간호사, 의사, 환자별 페이지에서 진료 접수, 데이터 기록, 예약 관리 등의 기능을 구현했습니다. 진단명/처방 자동완성 기능을 위해 CSV 파싱을 적용했습니다.",
             tech: ["Spring Boot", "Thymeleaf", "MySQL", "JPA"],
-            image: "/images/EMR.png",
+            image: emrImage,
             github: "https://github.com/F3ZLoV/Hospital_EMR",
             notion: "https://www.notion.so/Start-up-1ada55bf89ae80c8804bf36af1a7da83?pvs=74",
         },
@@ -171,7 +178,7 @@ export default function Component() {
             description:
                 "Hi-Fi 애호가들을 위한 커뮤니티 게시판으로 CRUD, 페이징, 검색, 파일 검증, 댓글/대댓글, 유튜브 링크 인식 등의 기능을 개발하고 AWS EC2에 배포했습니다.",
             tech: ["JSP/Servlet", "HTML", "CSS", "Bootstrap", "MySQL", "AWS EC2"],
-            image: "/images/commu.png",
+            image: commuImage,
             github: "https://github.com/F3ZLoV/JSPProject-HiFi_Community",
             notion: "https://www.notion.so/S-W-7bd042a39cbc459ca5bac2af3379e39d?pvs=74",
         },
@@ -180,7 +187,7 @@ export default function Component() {
             description:
                 "Java Window Programming을 이용한 간단한 은행 계좌 관리 프로그램입니다. 계좌 생성 및 관리, 잔액 조회, 입출금 기능을 구현했습니다.",
             tech: ["Java", "MySQL", "WindowBuilder"],
-            image: "/images/bank_account.png",
+            image: bankImage,
             github: "https://github.com/F3ZLoV/BankAccountManage-WindowApp",
             notion: "notion.so/1e9a55bf89ae80ce9578d1eb6b9dfd1b?pvs=74",
         },
@@ -303,7 +310,7 @@ export default function Component() {
                         <div className="absolute inset-8 rounded-full bg-primary/10 p-1">
                             <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center overflow-hidden">
                                 <Image
-                                    src="/images/hamter.png"
+                                    src={hamterImage}
                                     alt="박태준 프로필"
                                     className="w-full h-full object-cover rounded-full"
                                     width={200}
@@ -593,7 +600,7 @@ export default function Component() {
                                                 </Button>
                                                 <Button variant="outline" size="icon" asChild>
                                                     <a href={project.notion} target="_blank" rel="noopener noreferrer">
-                                                        <Image src="/images/notion.png" alt="Notion" width={16} height={16} />
+                                                        <Image src={notionImage} alt="Notion" width={16} height={16} />
                                                     </a>
                                                 </Button>
                                             </div>
