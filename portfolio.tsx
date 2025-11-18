@@ -49,7 +49,7 @@ const containerVariants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.2, // 자식 요소들이 0.2초 간격으로 나타남
+            staggerChildren: 0.2,
             delayChildren: 0.1,
         },
     },
@@ -116,8 +116,9 @@ export default function Component() {
         const targetSections: SectionId[] = ["home", "about"];
         setIsExporting(true);
 
-        // 상태 업데이트로 인한 리렌더링(애니메이션 제거)을 기다리기 위해 지연
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // [수정] 상태 업데이트 후 화면이 다시 그려질 때까지 충분히 대기 (100ms -> 500ms)
+        // 애니메이션이 꺼지고 요소가 보일 때까지 기다려야 함
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         try {
             const pdf = new jsPDF('p', 'mm', 'a4');
@@ -133,7 +134,7 @@ export default function Component() {
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: null // 투명 배경 (테마 색상 따름)
+                        backgroundColor: null
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -158,6 +159,7 @@ export default function Component() {
         }
     };
 
+    // 숙련도 렌더링 헬퍼 함수
     const renderSkillBadge = (icon: React.ReactNode, name: string, level: number) => {
         let levelText = "";
         let levelColorClass = "";
@@ -287,20 +289,18 @@ export default function Component() {
 
             {/* --- PAGE 1: HOME (Resume Style) --- */}
             <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
-                {/* [애니메이션 적용]
-                  isExporting이 true일 때는 애니메이션(initial="hidden")을 적용하지 않고 바로 보이게 처리
-                  viewport={{ once: true }}로 한 번만 실행되게 함
-                */}
+                {/* [수정] isExporting이 true일 때 variants와 initial을 해제하여 강제로 보이게 함 */}
                 <motion.div
                     className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300"
-                    variants={isExporting ? {} : containerVariants}
-                    initial={isExporting ? "visible" : "hidden"}
-                    whileInView="visible"
+                    variants={isExporting ? undefined : containerVariants}
+                    initial={isExporting ? undefined : "hidden"}
+                    whileInView={isExporting ? undefined : "visible"} // Export 중일 때는 whileInView 무시
                     viewport={{ once: true }}
+                    style={{ opacity: 1 }} // 강제 투명도 설정 (안전장치)
                 >
 
                     {/* 1. Header & Contact */}
-                    <motion.div variants={itemVariants} className="flex items-center justify-between border-b-2 border-foreground pb-6">
+                    <motion.div variants={isExporting ? undefined : itemVariants} className="flex items-center justify-between border-b-2 border-foreground pb-6">
                         <div className="space-y-2">
                             <h1 className="text-5xl font-extrabold tracking-tight text-foreground">박태준</h1>
                             <p className="text-xl font-semibold text-muted-foreground">Backend Developer & Cloud Engineer</p>
@@ -312,12 +312,12 @@ export default function Component() {
                             </div>
                         </div>
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
+                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </motion.div>
 
                     {/* 2. Profile Summary */}
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={isExporting ? undefined : itemVariants}>
                         <h2 className="text-xl font-bold text-foreground mb-2 uppercase border-l-4 border-foreground pl-3">Profile</h2>
                         <p className="text-sm leading-relaxed text-muted-foreground text-justify">
                             컴퓨터 게임을 좋아하는 게이머로서 항상 사용자의 입장을 생각합니다.
@@ -331,7 +331,7 @@ export default function Component() {
 
                         {/* Left Column */}
                         <div className="space-y-8">
-                            <motion.div variants={itemVariants}>
+                            <motion.div variants={isExporting ? undefined : itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Education</h2>
                                 <div className="space-y-4">
                                     <div className="relative pl-4 border-l-2 border-muted-foreground/20">
@@ -354,7 +354,7 @@ export default function Component() {
                                 </div>
                             </motion.div>
 
-                            <motion.div variants={itemVariants}>
+                            <motion.div variants={isExporting ? undefined : itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Certification</h2>
                                 <div className="space-y-3 text-sm border-t border-border pt-2 text-muted-foreground">
                                     <div className="flex justify-between border-b border-border pb-1">
@@ -379,7 +379,7 @@ export default function Component() {
 
                         {/* Right Column: Skills & Tools */}
                         <div className="space-y-8">
-                            <motion.div variants={itemVariants}>
+                            <motion.div variants={isExporting ? undefined : itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Skills & Tools</h2>
 
                                 <div className="space-y-5">
@@ -434,21 +434,22 @@ export default function Component() {
 
             {/* --- PAGE 2: ABOUT (Resume Page 2) --- */}
             <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4">
-                {/* [애니메이션 적용] */}
+                {/* [수정] isExporting이 true일 때 애니메이션 해제 */}
                 <motion.div
                     className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300"
-                    variants={isExporting ? {} : containerVariants}
-                    initial={isExporting ? "visible" : "hidden"}
-                    whileInView="visible"
+                    variants={isExporting ? undefined : containerVariants}
+                    initial={isExporting ? undefined : "hidden"}
+                    whileInView={isExporting ? undefined : "visible"}
                     viewport={{ once: true }}
+                    style={{ opacity: 1 }}
                 >
 
-                    <motion.div variants={itemVariants} className="border-b border-border pb-4">
+                    <motion.div variants={isExporting ? undefined : itemVariants} className="border-b border-border pb-4">
                         <h2 className="text-3xl font-bold text-foreground">About Me</h2>
                     </motion.div>
 
                     {/* 나의 여정 */}
-                    <motion.div variants={itemVariants} className="space-y-4">
+                    <motion.div variants={isExporting ? undefined : itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             나의 여정
@@ -466,7 +467,7 @@ export default function Component() {
                     </motion.div>
 
                     {/* 기술과 도전 */}
-                    <motion.div variants={itemVariants} className="space-y-4">
+                    <motion.div variants={isExporting ? undefined : itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             기술과 도전
@@ -485,7 +486,7 @@ export default function Component() {
                     </motion.div>
 
                     {/* 미래로의 도약 */}
-                    <motion.div variants={itemVariants} className="space-y-4">
+                    <motion.div variants={isExporting ? undefined : itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             미래로의 도약
