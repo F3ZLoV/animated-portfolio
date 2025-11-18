@@ -27,7 +27,7 @@ import {
 // 아이콘 라이브러리
 import {
     SiSpringboot, SiReact, SiHtml5, SiCss3, SiMysql, SiOracle,
-    SiMariadb, SiGit, SiGithub, SiDocker, SiCplusplus
+    SiMariadb, SiGit, SiGithub, SiDocker, SiCplusplus, SiNextdotjs, SiPython
 } from "react-icons/si";
 import { FaJava, FaAws } from "react-icons/fa";
 
@@ -41,7 +41,7 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
-import profileImage from './public/images/profile.jpg';
+import profileImage from './public/images/profile.jpeg';
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -109,7 +109,7 @@ export default function Component() {
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: null // 배경색 투명 (현재 테마 배경색 따름)
+                        backgroundColor: null
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -133,6 +133,22 @@ export default function Component() {
             setIsExporting(false);
         }
     };
+
+    // 숙련도(Level) 렌더링 헬퍼 함수 (1~3단계)
+    const renderSkillBadge = (icon: React.ReactNode, name: string, level: number) => (
+        <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground flex items-center">
+            {icon}
+            <span>{name}</span>
+            <span className="ml-1 flex gap-0.5" title={`Proficiency: ${level}/3`}>
+                {[1, 2, 3].map((i) => (
+                    <span
+                        key={i}
+                        className={`w-1.5 h-1.5 rounded-full ${i <= level ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
+                    />
+                ))}
+            </span>
+        </Badge>
+    );
 
     const projects = [
         {
@@ -203,7 +219,6 @@ export default function Component() {
                                     >
                                         {item}
                                     </a>
-                                    {/* Nav 밑줄 애니메이션 복구 */}
                                     {activeSection === item && (
                                         <motion.div
                                             layoutId="activeSection"
@@ -229,14 +244,11 @@ export default function Component() {
                 </div>
             </motion.nav>
 
-            {/* --- PAGE 1: HOME (Resume Style) --- */}
-            {/* [수정] 배경 및 텍스트 색상을 Theme 변수로 변경하여 다크모드 지원 */}
-            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
-                {/* [수정] bg-white, shadow 제거 -> bg-background로 통합하여 테두리 안 보이게 처리 */}
-                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
+            {/* --- PAGE 1: HOME --- */}
+            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4 bg-gray-100/50 dark:bg-background">
+                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
 
                     {/* 1. Header & Contact */}
-                    {/* [수정] border-slate-900 -> border-foreground */}
                     <div className="flex items-center justify-between border-b-2 border-foreground pb-6">
                         <div className="space-y-2">
                             <h1 className="text-5xl font-extrabold tracking-tight text-foreground">박태준</h1>
@@ -248,9 +260,8 @@ export default function Component() {
                                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> 인천시 서구</div>
                             </div>
                         </div>
-                        {/* Profile Image */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
 
@@ -325,15 +336,11 @@ export default function Component() {
                                     <div>
                                         <h3 className="text-sm font-bold text-muted-foreground mb-2">Backend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <FaJava className="text-red-500 text-base"/> Java
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiSpringboot className="text-green-600 text-base"/> Spring Boot
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiCplusplus className="text-blue-700 text-base"/> C++
-                                            </Badge>
+                                            {renderSkillBadge(<FaJava className="text-red-500 text-base"/>, "Java", 3)}
+                                            {renderSkillBadge(<SiSpringboot className="text-green-600 text-base"/>, "Spring Boot", 3)}
+                                            {/* [추가] Python */}
+                                            {renderSkillBadge(<SiPython className="text-yellow-500 text-base"/>, "Python", 2)}
+                                            {renderSkillBadge(<SiCplusplus className="text-blue-700 text-base"/>, "C++", 1)}
                                         </div>
                                     </div>
 
@@ -341,15 +348,11 @@ export default function Component() {
                                     <div>
                                         <h3 className="text-sm font-bold text-muted-foreground mb-2">Frontend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiReact className="text-blue-400 text-base"/> React
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiHtml5 className="text-orange-600 text-base"/> HTML5
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiCss3 className="text-blue-600 text-base"/> CSS3
-                                            </Badge>
+                                            {renderSkillBadge(<SiReact className="text-blue-400 text-base"/>, "React", 2)}
+                                            {/* [추가] Next.js */}
+                                            {renderSkillBadge(<SiNextdotjs className="text-foreground text-base"/>, "Next.js", 2)}
+                                            {renderSkillBadge(<SiHtml5 className="text-orange-600 text-base"/>, "HTML5", 2)}
+                                            {renderSkillBadge(<SiCss3 className="text-blue-600 text-base"/>, "CSS3", 2)}
                                         </div>
                                     </div>
 
@@ -357,15 +360,9 @@ export default function Component() {
                                     <div>
                                         <h3 className="text-sm font-bold text-muted-foreground mb-2">Database</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiMysql className="text-blue-600 text-base"/> MySQL
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiOracle className="text-red-600 text-base"/> Oracle
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiMariadb className="text-brown-600 text-base"/> MariaDB
-                                            </Badge>
+                                            {renderSkillBadge(<SiMysql className="text-blue-600 text-base"/>, "MySQL", 3)}
+                                            {renderSkillBadge(<SiOracle className="text-red-600 text-base"/>, "Oracle", 1)}
+                                            {renderSkillBadge(<SiMariadb className="text-brown-600 text-base"/>, "MariaDB", 3)}
                                         </div>
                                     </div>
 
@@ -373,18 +370,10 @@ export default function Component() {
                                     <div>
                                         <h3 className="text-sm font-bold text-muted-foreground mb-2">DevOps</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <FaAws className="text-orange-500 text-base"/> AWS
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiDocker className="text-blue-500 text-base"/> Docker
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiGit className="text-red-500 text-base"/> Git
-                                            </Badge>
-                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
-                                                <SiGithub className="text-foreground text-base"/> GitHub
-                                            </Badge>
+                                            {renderSkillBadge(<FaAws className="text-orange-500 text-base"/>, "AWS", 2)}
+                                            {renderSkillBadge(<SiDocker className="text-blue-500 text-base"/>, "Docker", 2)}
+                                            {renderSkillBadge(<SiGit className="text-red-500 text-base"/>, "Git", 3)}
+                                            {renderSkillBadge(<SiGithub className="text-foreground text-base"/>, "GitHub", 3)}
                                         </div>
                                     </div>
                                 </div>
@@ -396,13 +385,12 @@ export default function Component() {
 
             {/* --- PAGE 2: ABOUT (Resume Page 2) --- */}
             <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4">
-                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
+                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
 
                     <div className="border-b border-border pb-4">
                         <h2 className="text-3xl font-bold text-foreground">About Me</h2>
                     </div>
 
-                    {/* 나의 여정 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
@@ -420,7 +408,6 @@ export default function Component() {
                         </p>
                     </div>
 
-                    {/* 기술과 도전 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
@@ -439,7 +426,6 @@ export default function Component() {
                         </p>
                     </div>
 
-                    {/* 미래로의 도약 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
@@ -476,7 +462,6 @@ export default function Component() {
                                             <Button variant="secondary" size="sm" asChild>
                                                 <a href={project.github} target="_blank" rel="noopener noreferrer"><Github className="w-4 h-4 mr-2"/>GitHub</a>
                                             </Button>
-                                            {/* [수정] Notion 버튼에 이미지 로고 적용 */}
                                             <Button variant="secondary" size="sm" asChild>
                                                 <a href={project.notion} target="_blank" rel="noopener noreferrer">
                                                     <Image src={notionImage} alt="Notion" width={16} height={16} className="mr-2" />
