@@ -19,10 +19,11 @@ import {
     Sun,
     Moon,
     Award,
-    FileText, // PDF 아이콘 추가
+    FileText,
+    Loader2,
 } from "lucide-react"
 import { SiSpringboot } from "react-icons/si";
-import { FaJava } from "react-icons/fa";
+import { FaJava, FaAws } from "react-icons/fa"; // [수정] FaAws 추가
 import { SiCplusplus } from "react-icons/si";
 import { SiReact } from "react-icons/si";
 import { SiHtml5 } from "react-icons/si";
@@ -33,8 +34,9 @@ import { SiMariadb } from "react-icons/si";
 import { SiGit } from "react-icons/si";
 import { SiGithub } from "react-icons/si";
 import { SiDocker } from "react-icons/si";
-import jsPDF from 'jspdf'; // jspdf import
-import html2canvas from 'html2canvas'; // html2canvas import
+// import { SiAmazonaws } from "react-icons/si"; // [삭제] 기존 아이콘 제거
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 import hamterImage from './public/images/hamter.png';
 import lostarkImage from './public/images/lostark1.png';
@@ -49,12 +51,13 @@ export default function Component() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [activeSection, setActiveSection] = useState("home")
     const [isLoading, setIsLoading] = useState(true)
-    const portfolioRef = useRef<HTMLDivElement>(null); // 전체 포트폴리오 div를 위한 ref 추가
+    const [isExporting, setIsExporting] = useState(false)
+
+    const portfolioRef = useRef<HTMLDivElement>(null);
 
     const { scrollYProgress } = useScroll()
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
 
-    // [수정 1] useRef에 HTMLElement 타입을 명시합니다.
     const sectionRefs = {
         home: useRef<HTMLElement>(null),
         info: useRef<HTMLElement>(null),
@@ -63,7 +66,6 @@ export default function Component() {
         contact: useRef<HTMLElement>(null),
     }
 
-    // [수정 1] sectionRefs의 키를 기반으로 타입을 정의합니다.
     type SectionId = keyof typeof sectionRefs;
 
     useEffect(() => {
@@ -74,27 +76,24 @@ export default function Component() {
         return () => clearTimeout(timer)
     }, [])
 
-    // [수정 2] 스크롤 이벤트 핸들러 로직을 수정합니다.
     useEffect(() => {
         const handleScroll = () => {
-            // 페이지 맨 아래에 도달했는지 확인 (10px 여유)
             const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
 
             if (isAtBottom) {
-                setActiveSection("contact"); // 맨 아래면 'contact'로 강제 설정
+                setActiveSection("contact");
                 return;
             }
 
             const scrollPosition = window.scrollY + 100
             const sections: SectionId[] = ["home", "info", "about", "projects", "contact"];
-            let currentSection: SectionId = "home"; // 기본값
+            let currentSection: SectionId = "home";
 
             for (const section of sections) {
                 const element = sectionRefs[section].current
                 if (element && scrollPosition >= element.offsetTop) {
-                    currentSection = section; // 스크롤 위치가 섹션의 시작점보다 크거나 같으면 이 섹션으로 업데이트
+                    currentSection = section;
                 } else {
-                    // 다음 섹션은 아직 스크롤 위치에 도달하지 않았으므로 중단
                     break;
                 }
             }
@@ -105,53 +104,56 @@ export default function Component() {
         return () => {
             window.removeEventListener("scroll", handleScroll)
         }
-    }, []) // 의존성 배열은 기존대로 비워둡니다.
+    }, [])
 
     // PDF 내보내기 함수
     const handleExportPdf = async () => {
-        const element = portfolioRef.current;
-        if (!element) return;
+        const sections: SectionId[] = ["home", "info", "about", "projects", "contact"];
 
-        // PDF 생성 전 스크롤바 숨기기 등 스타일 조정 (선택 사항)
-        const originalStyle = element.style.overflow;
-        element.style.overflow = 'visible'; // 전체 콘텐츠가 보이도록
+        setIsExporting(true);
 
-        const canvas = await html2canvas(element, {
-            scale: 2, // 해상도 향상
-            useCORS: true, // 외부 이미지 로드 허용
-            scrollY: -window.scrollY // 현재 스크롤 위치 반영
-        });
+        try {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            // const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        // 스타일 복원
-        element.style.overflow = originalStyle;
+            for (let i = 0; i < sections.length; i++) {
+                const sectionKey = sections[i];
+                const element = sectionRefs[sectionKey].current;
 
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4'); // A4 용지, 세로 방향
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = imgProps.width;
-        const imgHeight = imgProps.height;
+                if (element) {
+                    const canvas = await html2canvas(element, {
+                        scale: 1,
+                        useCORS: true,
+                        logging: false,
+                        x: 0,
+                        y: 0
+                    });
 
-        // 이미지 비율 계산
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const imgWidth = imgProps.width;
+                    const imgHeight = imgProps.height;
 
-        // 이미지 크기 및 위치 계산 (가운데 정렬)
-        const imgX = (pdfWidth - imgWidth * ratio) / 2;
-        // const imgY = (pdfHeight - imgHeight * ratio) / 2; // 세로 가운데 정렬 시 사용
-        const imgY = 0; // 페이지 상단부터 시작
+                    const ratio = pdfWidth / imgWidth;
+                    const scaledHeight = imgHeight * ratio;
 
-        // 페이지 크기에 맞춰 이미지 높이 계산
-        const scaledHeight = imgHeight * ratio;
+                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, scaledHeight);
 
-        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, scaledHeight);
-        pdf.save('portfolio.pdf');
+                    if (i < sections.length - 1) {
+                        pdf.addPage();
+                    }
+                }
+            }
 
-        // 새 탭에서 PDF 열기 (Blob URL 사용)
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
-        URL.revokeObjectURL(pdfUrl); // 메모리 해제
+            pdf.save('portfolio.pdf');
+
+        } catch (error) {
+            console.error("PDF extraction failed:", error);
+            alert("PDF 변환 중 오류가 발생했습니다.");
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const projects = [
@@ -214,8 +216,7 @@ export default function Component() {
     }
 
     return (
-        // 전체 컨텐츠를 portfolioRef로 감싸줍니다.
-        <div ref={portfolioRef} className="min-h-screen bg-background text-foreground overflow-x-hidden"> {/* overflow-x-hidden 추가 */}
+        <div ref={portfolioRef} className="min-h-screen bg-background text-foreground overflow-x-hidden">
             <motion.div
                 className="fixed top-0 left-0 right-0 h-1 bg-primary z-50"
                 style={{ scaleX, transformOrigin: "0%" }}
@@ -243,7 +244,6 @@ export default function Component() {
                                             activeSection === item ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                                         } transition-colors`}
                                     >
-                                        {/* [수정 3] 'info'를 'Skills'로 변경 */}
                                         {item === 'info' ? 'Skills' : item}
                                         {activeSection === item && (
                                             <motion.div layoutId="activeSection" className="h-0.5 bg-primary mt-1 rounded-full" />
@@ -252,7 +252,6 @@ export default function Component() {
                                 ))}
                             </div>
 
-                            {/* 다크모드 버튼 */}
                             <Button
                                 variant="outline"
                                 size="icon"
@@ -264,15 +263,19 @@ export default function Component() {
                                 <span className="sr-only">Toggle theme</span>
                             </Button>
 
-                            {/* PDF 내보내기 버튼 */}
                             <Button
                                 variant="outline"
                                 size="icon"
                                 className="hidden md:inline-flex rounded-full bg-background/50 border-border"
                                 onClick={handleExportPdf}
+                                disabled={isExporting}
                                 title="Export as PDF"
                             >
-                                <FileText className="h-[1.2rem] w-[1.2rem]" />
+                                {isExporting ? (
+                                    <Loader2 className="h-[1.2rem] w-[1.2rem] animate-spin" />
+                                ) : (
+                                    <FileText className="h-[1.2rem] w-[1.2rem]" />
+                                )}
                                 <span className="sr-only">Export as PDF</span>
                             </Button>
 
@@ -393,7 +396,6 @@ export default function Component() {
             <section id="info" ref={sectionRefs.info} className="py-32 px-4">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-                        {/* [수정 4] h2 태그 수정 */}
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Skills & Info</h2>
                         <div className="w-24 h-1 bg-primary mx-auto"></div>
                     </motion.div>
@@ -449,9 +451,9 @@ export default function Component() {
                                         <p className="text-sm text-muted-foreground mt-1">2026.04</p>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-lg">AWS Cloud Associate</h3>
+                                        <h3 className="font-semibold text-lg">AWS Solution Associate</h3>
                                         <p className="text-primary">Amazon AWS</p>
-                                        <p className="text-sm text-muted-foreground mt-1">2026.06</p>
+                                        <p className="text-sm text-muted-foreground mt-1">2026.08</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -534,6 +536,11 @@ export default function Component() {
                                                 <SiDocker title="Docker" />
                                                 <span className="text-xs mt-1">Docker</span>
                                             </div>
+                                            {/* [수정] AWS 아이콘 변경 */}
+                                            <div className="flex flex-col items-center">
+                                                <FaAws title="AWS" />
+                                                <span className="text-xs mt-1">AWS</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -569,7 +576,7 @@ export default function Component() {
             </section>
 
             {/* Projects Section */}
-            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4"> {/* Removed bg-secondary */}
+            <section id="projects" ref={sectionRefs.projects} className="py-32 px-4">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Projects</h2>
@@ -622,7 +629,7 @@ export default function Component() {
             </section>
 
             {/* Contact Section */}
-            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4 bg-secondary"> {/* Added bg-secondary */}
+            <section id="contact" ref={sectionRefs.contact} className="py-32 px-4 bg-secondary">
                 <div className="container mx-auto">
                     <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Get In Touch</h2>
