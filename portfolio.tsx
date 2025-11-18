@@ -134,21 +134,39 @@ export default function Component() {
         }
     };
 
-    // 숙련도(Level) 렌더링 헬퍼 함수 (1~3단계)
-    const renderSkillBadge = (icon: React.ReactNode, name: string, level: number) => (
-        <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground flex items-center">
-            {icon}
-            <span>{name}</span>
-            <span className="ml-1 flex gap-0.5" title={`Proficiency: ${level}/3`}>
-                {[1, 2, 3].map((i) => (
-                    <span
-                        key={i}
-                        className={`w-1.5 h-1.5 rounded-full ${i <= level ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}
-                    />
-                ))}
-            </span>
-        </Badge>
-    );
+    // [수정] 숙련도 렌더링 헬퍼 함수 (상/중/하 텍스트 + 색상)
+    const renderSkillBadge = (icon: React.ReactNode, name: string, level: number) => {
+        let levelText = "";
+        let levelColorClass = "";
+
+        switch (level) {
+            case 3:
+                levelText = "상";
+                levelColorClass = "text-green-600 dark:text-green-400 font-bold";
+                break;
+            case 2:
+                levelText = "중";
+                levelColorClass = "text-blue-600 dark:text-blue-400 font-bold";
+                break;
+            case 1:
+                levelText = "하";
+                levelColorClass = "text-yellow-600 dark:text-yellow-400 font-bold";
+                break;
+            default:
+                levelText = "-";
+                levelColorClass = "text-muted-foreground";
+        }
+
+        return (
+            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground flex items-center">
+                {icon}
+                <span>{name}</span>
+                <span className={`ml-1 text-xs ${levelColorClass}`}>
+                    ({levelText})
+                </span>
+            </Badge>
+        );
+    };
 
     const projects = [
         {
@@ -244,7 +262,7 @@ export default function Component() {
                 </div>
             </motion.nav>
 
-            {/* --- PAGE 1: HOME --- */}
+            {/* --- PAGE 1: HOME (Resume Style) --- */}
             <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4 bg-gray-100/50 dark:bg-background">
                 <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
 
@@ -260,8 +278,9 @@ export default function Component() {
                                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> 인천시 서구</div>
                             </div>
                         </div>
+                        {/* Profile Image */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
+                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
 
@@ -391,6 +410,7 @@ export default function Component() {
                         <h2 className="text-3xl font-bold text-foreground">About Me</h2>
                     </div>
 
+                    {/* 나의 여정 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
@@ -408,6 +428,7 @@ export default function Component() {
                         </p>
                     </div>
 
+                    {/* 기술과 도전 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
@@ -426,6 +447,7 @@ export default function Component() {
                         </p>
                     </div>
 
+                    {/* 미래로의 도약 */}
                     <div className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
