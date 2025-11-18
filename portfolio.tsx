@@ -263,7 +263,7 @@ export default function Component() {
             </motion.nav>
 
             {/* --- PAGE 1: HOME (Resume Style) --- */}
-            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4 bg-gray-100/50 dark:bg-background">
+            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
                 <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
 
                     {/* 1. Header & Contact */}
