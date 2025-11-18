@@ -41,7 +41,7 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
-import profileImage from './public/images/profile.jpeg'; // 프로필 사진
+import profileImage from './public/images/profile.jpg';
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -250,7 +250,7 @@ export default function Component() {
                         </div>
                         {/* Profile Image */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
+                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
 
