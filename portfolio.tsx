@@ -22,13 +22,12 @@ import {
     Loader2,
     Phone,
     MapPin,
-    ExternalLink
 } from "lucide-react"
 
 // 아이콘 라이브러리
 import {
     SiSpringboot, SiReact, SiHtml5, SiCss3, SiMysql, SiOracle,
-    SiMariadb, SiGit, SiGithub, SiDocker, SiAmazonaws, SiCplusplus
+    SiMariadb, SiGit, SiGithub, SiDocker, SiCplusplus
 } from "react-icons/si";
 import { FaJava, FaAws } from "react-icons/fa";
 
@@ -42,6 +41,7 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
+import profileImage from './public/images/profile.jpeg'; // 프로필 사진
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -109,7 +109,7 @@ export default function Component() {
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: '#ffffff'
+                        backgroundColor: null // 배경색 투명 (현재 테마 배경색 따름)
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -121,11 +121,10 @@ export default function Component() {
                 }
             }
 
-            // [수정] 다운로드 대신 새 탭에서 열고 인쇄 대화상자 띄우기
-            pdf.autoPrint(); // 인쇄 설정 추가
+            pdf.autoPrint();
             const blob = pdf.output('blob');
             const url = URL.createObjectURL(blob);
-            window.open(url, '_blank'); // 새 탭 열기
+            window.open(url, '_blank');
 
         } catch (error) {
             console.error("PDF extraction failed:", error);
@@ -185,7 +184,7 @@ export default function Component() {
     }
 
     return (
-        <div ref={portfolioRef} className="min-h-screen bg-secondary/30 text-foreground overflow-x-hidden font-sans">
+        <div ref={portfolioRef} className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans transition-colors duration-300">
             <motion.div className="fixed top-0 left-0 right-0 h-1 bg-primary z-50" style={{ scaleX, transformOrigin: "0%" }} />
 
             {/* Navigation Bar */}
@@ -204,7 +203,7 @@ export default function Component() {
                                     >
                                         {item}
                                     </a>
-                                    {/* [수정] Nav 밑줄 애니메이션 복구 */}
+                                    {/* Nav 밑줄 애니메이션 복구 */}
                                     {activeSection === item && (
                                         <motion.div
                                             layoutId="activeSection"
@@ -231,31 +230,34 @@ export default function Component() {
             </motion.nav>
 
             {/* --- PAGE 1: HOME (Resume Style) --- */}
-            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4 bg-gray-100/50">
-                {/* [수정] 그림자/테두리 제거 (shadow-none, border-none) */}
-                <div className="a4-page bg-white text-slate-900 p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
+            {/* [수정] 배경 및 텍스트 색상을 Theme 변수로 변경하여 다크모드 지원 */}
+            <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
+                {/* [수정] bg-white, shadow 제거 -> bg-background로 통합하여 테두리 안 보이게 처리 */}
+                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
 
                     {/* 1. Header & Contact */}
-                    <div className="flex items-center justify-between border-b-2 border-slate-900 pb-6">
+                    {/* [수정] border-slate-900 -> border-foreground */}
+                    <div className="flex items-center justify-between border-b-2 border-foreground pb-6">
                         <div className="space-y-2">
-                            <h1 className="text-5xl font-extrabold tracking-tight text-slate-900">박태준</h1>
-                            <p className="text-xl font-semibold text-slate-600">Backend Developer & Cloud Engineer</p>
-                            <div className="flex flex-col gap-1 text-sm text-slate-500 pt-2">
+                            <h1 className="text-5xl font-extrabold tracking-tight text-foreground">박태준</h1>
+                            <p className="text-xl font-semibold text-muted-foreground">Backend Developer & Cloud Engineer</p>
+                            <div className="flex flex-col gap-1 text-sm text-muted-foreground pt-2">
                                 <div className="flex items-center gap-2"><Phone className="w-3 h-3"/> 010-2483-5726</div>
                                 <div className="flex items-center gap-2"><Mail className="w-3 h-3"/> fsirtru@gmail.com</div>
                                 <div className="flex items-center gap-2"><Github className="w-3 h-3"/> github.com/F3ZLoV</div>
                                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> 인천시 서구</div>
                             </div>
                         </div>
-                        <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-slate-100 shadow-inner relative">
+                        {/* Profile Image */}
+                        <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
                             <Image src={hamterImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
 
                     {/* 2. Profile Summary */}
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900 mb-2 uppercase border-l-4 border-slate-900 pl-3">Profile</h2>
-                        <p className="text-sm leading-relaxed text-slate-700 text-justify">
+                        <h2 className="text-xl font-bold text-foreground mb-2 uppercase border-l-4 border-foreground pl-3">Profile</h2>
+                        <p className="text-sm leading-relaxed text-muted-foreground text-justify">
                             컴퓨터 게임을 좋아하는 게이머로서 항상 사용자의 입장을 생각합니다.
                             단순한 기능 구현을 넘어 안정적인 백엔드 시스템 구축과 효율적인 클라우드 엔지니어링까지 경험하며,
                             모르는 것을 두려워하지 않고 끊임없이 성장하는 개발자가 되고 싶습니다.
@@ -268,68 +270,68 @@ export default function Component() {
                         {/* Left Column */}
                         <div className="space-y-8">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Education</h2>
+                                <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Education</h2>
                                 <div className="space-y-4">
-                                    <div className="relative pl-4 border-l-2 border-slate-200">
-                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
-                                        <h3 className="font-bold text-base">가좌고등학교</h3>
-                                        <p className="text-xs text-slate-500">~ 2020.02</p>
+                                    <div className="relative pl-4 border-l-2 border-muted-foreground/20">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-muted-foreground"></div>
+                                        <h3 className="font-bold text-base text-foreground">가좌고등학교</h3>
+                                        <p className="text-xs text-muted-foreground">~ 2020.02</p>
                                     </div>
-                                    <div className="relative pl-4 border-l-2 border-slate-200">
-                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
-                                        <h3 className="font-bold text-base">인하공업전문대학</h3>
-                                        <p className="text-sm font-medium text-slate-700">컴퓨터정보과 (공학사)</p>
-                                        <p className="text-xs text-slate-500">2026.03 ~ 2027.02 (예정)</p>
+                                    <div className="relative pl-4 border-l-2 border-muted-foreground/20">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-muted-foreground"></div>
+                                        <h3 className="font-bold text-base text-foreground">인하공업전문대학</h3>
+                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (공학사)</p>
+                                        <p className="text-xs text-muted-foreground">2026.03 ~ 2027.02 (예정)</p>
                                     </div>
-                                    <div className="relative pl-4 border-l-2 border-slate-200">
-                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
-                                        <h3 className="font-bold text-base">인하공업전문대학</h3>
-                                        <p className="text-sm font-medium text-slate-700">컴퓨터정보과 (전문학사)</p>
-                                        <p className="text-xs text-slate-500">2020.03 ~ 2026.02</p>
+                                    <div className="relative pl-4 border-l-2 border-muted-foreground/20">
+                                        <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-muted-foreground"></div>
+                                        <h3 className="font-bold text-base text-foreground">인하공업전문대학</h3>
+                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (전문학사)</p>
+                                        <p className="text-xs text-muted-foreground">2020.03 ~ 2026.02</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Certification</h2>
-                                <div className="space-y-3 text-sm border-t border-slate-100 pt-2">
-                                    <div className="flex justify-between border-b border-slate-50 pb-1">
-                                        <span className="font-semibold">정보처리산업기사</span>
-                                        <span className="text-slate-500">2025.12</span>
+                                <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Certification</h2>
+                                <div className="space-y-3 text-sm border-t border-border pt-2 text-muted-foreground">
+                                    <div className="flex justify-between border-b border-border pb-1">
+                                        <span className="font-semibold text-foreground">정보처리산업기사</span>
+                                        <span>2025.12</span>
                                     </div>
-                                    <div className="flex justify-between border-b border-slate-50 pb-1">
-                                        <span className="font-semibold">리눅스 마스터 2급</span>
-                                        <span className="text-slate-500">2026.03</span>
+                                    <div className="flex justify-between border-b border-border pb-1">
+                                        <span className="font-semibold text-foreground">리눅스 마스터 2급</span>
+                                        <span>2026.03</span>
                                     </div>
-                                    <div className="flex justify-between border-b border-slate-50 pb-1">
-                                        <span className="font-semibold">AWS Cloud Practitioner</span>
-                                        <span className="text-slate-500">2026.04</span>
+                                    <div className="flex justify-between border-b border-border pb-1">
+                                        <span className="font-semibold text-foreground">AWS Cloud Practitioner</span>
+                                        <span>2026.04</span>
                                     </div>
-                                    <div className="flex justify-between border-b border-slate-50 pb-1">
-                                        <span className="font-semibold">AWS Solution Associate</span>
-                                        <span className="text-slate-500">2026.08</span>
+                                    <div className="flex justify-between border-b border-border pb-1">
+                                        <span className="font-semibold text-foreground">AWS Solution Associate</span>
+                                        <span>2026.08</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right Column: Skills & Tools - [수정] 개별 아이콘 적용 */}
+                        {/* Right Column: Skills & Tools */}
                         <div className="space-y-8">
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900 mb-4 uppercase border-l-4 border-slate-900 pl-3">Skills & Tools</h2>
+                                <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Skills & Tools</h2>
 
                                 <div className="space-y-5">
                                     {/* Backend */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Backend</h3>
+                                        <h3 className="text-sm font-bold text-muted-foreground mb-2">Backend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <FaJava className="text-red-500 text-base"/> Java
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiSpringboot className="text-green-600 text-base"/> Spring Boot
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiCplusplus className="text-blue-700 text-base"/> C++
                                             </Badge>
                                         </div>
@@ -337,15 +339,15 @@ export default function Component() {
 
                                     {/* Frontend */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Frontend</h3>
+                                        <h3 className="text-sm font-bold text-muted-foreground mb-2">Frontend</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiReact className="text-blue-400 text-base"/> React
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiHtml5 className="text-orange-600 text-base"/> HTML5
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiCss3 className="text-blue-600 text-base"/> CSS3
                                             </Badge>
                                         </div>
@@ -353,15 +355,15 @@ export default function Component() {
 
                                     {/* Database */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2">Database</h3>
+                                        <h3 className="text-sm font-bold text-muted-foreground mb-2">Database</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiMysql className="text-blue-600 text-base"/> MySQL
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiOracle className="text-red-600 text-base"/> Oracle
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiMariadb className="text-brown-600 text-base"/> MariaDB
                                             </Badge>
                                         </div>
@@ -369,19 +371,19 @@ export default function Component() {
 
                                     {/* DevOps */}
                                     <div>
-                                        <h3 className="text-sm font-bold text-slate-700 mb-2">DevOps</h3>
+                                        <h3 className="text-sm font-bold text-muted-foreground mb-2">DevOps</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <FaAws className="text-orange-500 text-base"/> AWS
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiDocker className="text-blue-500 text-base"/> Docker
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
                                                 <SiGit className="text-red-500 text-base"/> Git
                                             </Badge>
-                                            <Badge className="bg-slate-100 hover:bg-slate-200 text-slate-800 gap-1.5 px-2 py-1">
-                                                <SiGithub className="text-black text-base"/> GitHub
+                                            <Badge variant="outline" className="gap-1.5 px-2 py-1 text-foreground">
+                                                <SiGithub className="text-foreground text-base"/> GitHub
                                             </Badge>
                                         </div>
                                     </div>
@@ -393,12 +395,11 @@ export default function Component() {
             </section>
 
             {/* --- PAGE 2: ABOUT (Resume Page 2) --- */}
-            <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4 bg-gray-100/50">
-                {/* [수정] 그림자/테두리 제거 */}
-                <div className="a4-page bg-white text-slate-900 p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
+            <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4">
+                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border">
 
-                    <div className="border-b pb-4">
-                        <h2 className="text-3xl font-bold text-slate-900">About Me</h2>
+                    <div className="border-b border-border pb-4">
+                        <h2 className="text-3xl font-bold text-foreground">About Me</h2>
                     </div>
 
                     {/* 나의 여정 */}
@@ -407,7 +408,7 @@ export default function Component() {
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             나의 여정
                         </h3>
-                        <p className="text-sm leading-7 text-slate-700 text-justify">
+                        <p className="text-sm leading-7 text-muted-foreground text-justify">
                             저는 컴퓨터라곤 게임을 위한 도구로 밖에 모르던 고등학교 2학년 때, 친구와 함께 호기심으로 참가한
                             <b> UNIST 슈퍼컴퓨팅 청소년 캠프</b>를 통해 인생의 터닝포인트를 맞이했습니다.
                             4박 5일간의 짧은 시간이었지만 수준 높은 실습과 특강을 통해 처음으로 프로그래밍이라는 세계에 매료되었고,
@@ -425,7 +426,7 @@ export default function Component() {
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             기술과 도전
                         </h3>
-                        <p className="text-sm leading-7 text-slate-700 text-justify">
+                        <p className="text-sm leading-7 text-muted-foreground text-justify">
                             저는 <b>'모르는 것을 두려워하지 않는 개발자'</b>가 되고 싶습니다.
                             3학년 1학기에 <b>병원 EMR 시스템</b> 개발을 개인 프로젝트로 진행하려 할 때, Java 스킬만 다져놓은 상태였고 Spring에 대해서는 전무했습니다.
                             그러나 병원 업무 시스템을 제대로 구현하기 위해서는 백엔드 프레임워크가 필수적이라고 판단했고,
@@ -444,7 +445,7 @@ export default function Component() {
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             미래로의 도약
                         </h3>
-                        <p className="text-sm leading-7 text-slate-700 text-justify">
+                        <p className="text-sm leading-7 text-muted-foreground text-justify">
                             저는 대학에서의 다양한 강의와 과제 활동, 프로젝트를 통해 실무에서 필요한 기초 역량을 쌓는 귀중한 경험을 하였습니다.
                             이러한 경험들은 개발자로서의 토대를 다지는 데 큰 도움이 되었지만, 동시에 아직 배워야 할 것이 차고 넘친다는 사실도 깨달았습니다.
                             <br className="mb-2 block"/>
@@ -475,8 +476,12 @@ export default function Component() {
                                             <Button variant="secondary" size="sm" asChild>
                                                 <a href={project.github} target="_blank" rel="noopener noreferrer"><Github className="w-4 h-4 mr-2"/>GitHub</a>
                                             </Button>
+                                            {/* [수정] Notion 버튼에 이미지 로고 적용 */}
                                             <Button variant="secondary" size="sm" asChild>
-                                                <a href={project.notion} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4 mr-2"/>Notion</a>
+                                                <a href={project.notion} target="_blank" rel="noopener noreferrer">
+                                                    <Image src={notionImage} alt="Notion" width={16} height={16} className="mr-2" />
+                                                    Notion
+                                                </a>
                                             </Button>
                                         </div>
                                     </div>
