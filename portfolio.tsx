@@ -280,7 +280,7 @@ export default function Component() {
                         </div>
                         {/* Profile Image */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
                         </div>
                     </div>
 
