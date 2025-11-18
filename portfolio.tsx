@@ -41,7 +41,28 @@ import emrImage from './public/images/EMR.png';
 import commuImage from './public/images/commu.png';
 import bankImage from './public/images/bank_account.png';
 import notionImage from './public/images/notion.png';
-import profileImage from './public/images/profile.jpg';
+import profileImage from './public/images/profile.jpeg';
+
+// 애니메이션 Variants 설정
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.2, // 자식 요소들이 0.2초 간격으로 나타남
+            delayChildren: 0.1,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: "easeOut" }
+    },
+};
 
 export default function Component() {
     const { setTheme, theme } = useTheme()
@@ -95,6 +116,9 @@ export default function Component() {
         const targetSections: SectionId[] = ["home", "about"];
         setIsExporting(true);
 
+        // 상태 업데이트로 인한 리렌더링(애니메이션 제거)을 기다리기 위해 지연
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         try {
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -109,7 +133,7 @@ export default function Component() {
                         scale: 2,
                         useCORS: true,
                         logging: false,
-                        backgroundColor: null
+                        backgroundColor: null // 투명 배경 (테마 색상 따름)
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -134,7 +158,6 @@ export default function Component() {
         }
     };
 
-    // [수정] 숙련도 렌더링 헬퍼 함수 (상/중/하 텍스트 + 색상)
     const renderSkillBadge = (icon: React.ReactNode, name: string, level: number) => {
         let levelText = "";
         let levelColorClass = "";
@@ -264,10 +287,20 @@ export default function Component() {
 
             {/* --- PAGE 1: HOME (Resume Style) --- */}
             <section id="home" ref={sectionRefs.home} className="pt-28 pb-16 flex justify-center px-4">
-                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
+                {/* [애니메이션 적용]
+                  isExporting이 true일 때는 애니메이션(initial="hidden")을 적용하지 않고 바로 보이게 처리
+                  viewport={{ once: true }}로 한 번만 실행되게 함
+                */}
+                <motion.div
+                    className="a4-page bg-background text-foreground p-12 flex flex-col gap-8 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300"
+                    variants={isExporting ? {} : containerVariants}
+                    initial={isExporting ? "visible" : "hidden"}
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                >
 
                     {/* 1. Header & Contact */}
-                    <div className="flex items-center justify-between border-b-2 border-foreground pb-6">
+                    <motion.div variants={itemVariants} className="flex items-center justify-between border-b-2 border-foreground pb-6">
                         <div className="space-y-2">
                             <h1 className="text-5xl font-extrabold tracking-tight text-foreground">박태준</h1>
                             <p className="text-xl font-semibold text-muted-foreground">Backend Developer & Cloud Engineer</p>
@@ -278,28 +311,27 @@ export default function Component() {
                                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> 인천시 서구</div>
                             </div>
                         </div>
-                        {/* Profile Image */}
                         <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-muted shadow-inner relative">
-                            <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                            <Image src={hamterImage} alt="Profile" fill className="object-cover" />
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* 2. Profile Summary */}
-                    <div>
+                    <motion.div variants={itemVariants}>
                         <h2 className="text-xl font-bold text-foreground mb-2 uppercase border-l-4 border-foreground pl-3">Profile</h2>
                         <p className="text-sm leading-relaxed text-muted-foreground text-justify">
                             컴퓨터 게임을 좋아하는 게이머로서 항상 사용자의 입장을 생각합니다.
                             단순한 기능 구현을 넘어 안정적인 백엔드 시스템 구축과 효율적인 클라우드 엔지니어링까지 경험하며,
                             모르는 것을 두려워하지 않고 끊임없이 성장하는 개발자가 되고 싶습니다.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* 3. Main Content Grid (50:50 Split) */}
                     <div className="grid grid-cols-2 gap-10 flex-grow">
 
                         {/* Left Column */}
                         <div className="space-y-8">
-                            <div>
+                            <motion.div variants={itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Education</h2>
                                 <div className="space-y-4">
                                     <div className="relative pl-4 border-l-2 border-muted-foreground/20">
@@ -320,9 +352,9 @@ export default function Component() {
                                         <p className="text-xs text-muted-foreground">2020.03 ~ 2026.02</p>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
 
-                            <div>
+                            <motion.div variants={itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Certification</h2>
                                 <div className="space-y-3 text-sm border-t border-border pt-2 text-muted-foreground">
                                     <div className="flex justify-between border-b border-border pb-1">
@@ -342,12 +374,12 @@ export default function Component() {
                                         <span>2026.08</span>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
 
                         {/* Right Column: Skills & Tools */}
                         <div className="space-y-8">
-                            <div>
+                            <motion.div variants={itemVariants}>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Skills & Tools</h2>
 
                                 <div className="space-y-5">
@@ -357,7 +389,6 @@ export default function Component() {
                                         <div className="flex flex-wrap gap-2">
                                             {renderSkillBadge(<FaJava className="text-red-500 text-base"/>, "Java", 3)}
                                             {renderSkillBadge(<SiSpringboot className="text-green-600 text-base"/>, "Spring Boot", 3)}
-                                            {/* [추가] Python */}
                                             {renderSkillBadge(<SiPython className="text-yellow-500 text-base"/>, "Python", 2)}
                                             {renderSkillBadge(<SiCplusplus className="text-blue-700 text-base"/>, "C++", 1)}
                                         </div>
@@ -368,7 +399,6 @@ export default function Component() {
                                         <h3 className="text-sm font-bold text-muted-foreground mb-2">Frontend</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {renderSkillBadge(<SiReact className="text-blue-400 text-base"/>, "React", 2)}
-                                            {/* [추가] Next.js */}
                                             {renderSkillBadge(<SiNextdotjs className="text-foreground text-base"/>, "Next.js", 2)}
                                             {renderSkillBadge(<SiHtml5 className="text-orange-600 text-base"/>, "HTML5", 2)}
                                             {renderSkillBadge(<SiCss3 className="text-blue-600 text-base"/>, "CSS3", 2)}
@@ -396,22 +426,29 @@ export default function Component() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             {/* --- PAGE 2: ABOUT (Resume Page 2) --- */}
             <section id="about" ref={sectionRefs.about} className="py-16 flex justify-center px-4">
-                <div className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300">
+                {/* [애니메이션 적용] */}
+                <motion.div
+                    className="a4-page bg-background text-foreground p-12 flex flex-col gap-10 max-w-[794px] w-full min-h-[1123px] relative overflow-hidden mx-auto box-border transition-colors duration-300"
+                    variants={isExporting ? {} : containerVariants}
+                    initial={isExporting ? "visible" : "hidden"}
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                >
 
-                    <div className="border-b border-border pb-4">
+                    <motion.div variants={itemVariants} className="border-b border-border pb-4">
                         <h2 className="text-3xl font-bold text-foreground">About Me</h2>
-                    </div>
+                    </motion.div>
 
                     {/* 나의 여정 */}
-                    <div className="space-y-4">
+                    <motion.div variants={itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             나의 여정
@@ -426,10 +463,10 @@ export default function Component() {
                             대학에서는 컴퓨터 구조, 운영체제, 네트워크 등 전공 이론과 함께 다양한 팀/개인 프로젝트를 진행하며 실력을 쌓았고,
                             문서 작성과 협업 경험을 통해 문제 해결 중심의 사고 방식과 실무 역량을 키워나갔습니다.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* 기술과 도전 */}
-                    <div className="space-y-4">
+                    <motion.div variants={itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             기술과 도전
@@ -445,10 +482,10 @@ export default function Component() {
                             이 과정에서 <b>'개발은 문제를 해결해나가는 과정'</b>이라는 사실을 깊이 체감했습니다.
                             이런 경험을 토대로, 앞으로 마주할 새로운 기술이나 난관도 두려워하지 않고 부딪혀 내 것으로 만드는 사람이 될 것입니다.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* 미래로의 도약 */}
-                    <div className="space-y-4">
+                    <motion.div variants={itemVariants} className="space-y-4">
                         <h3 className="text-xl font-bold text-primary flex items-center gap-2">
                             <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
                             미래로의 도약
@@ -462,8 +499,8 @@ export default function Component() {
                             단순히 빠른 결과만을 추구하기보다는, 시행착오를 겪고 스스로 고민하고 해결하는 과정들을 저의 소중한 자산이라 여기며
                             한 걸음씩 단단하게 전진하는 개발자가 되겠습니다.
                         </p>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </section>
 
             {/* Projects Section (Web Style) */}
