@@ -313,14 +313,14 @@ export default function Component() {
                                     <div className="relative pl-4 border-l-2 border-muted-foreground/20">
                                         <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-muted-foreground"></div>
                                         <h3 className="font-bold text-base text-foreground">인하공업전문대학</h3>
-                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (공학사)</p>
-                                        <p className="text-xs text-muted-foreground">2026.03 ~ 2027.02 (예정)</p>
+                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (전문학사)</p>
+                                        <p className="text-xs text-muted-foreground">2020.03 ~ 2026.02</p>
                                     </div>
                                     <div className="relative pl-4 border-l-2 border-muted-foreground/20">
                                         <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-muted-foreground"></div>
                                         <h3 className="font-bold text-base text-foreground">인하공업전문대학</h3>
-                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (전문학사)</p>
-                                        <p className="text-xs text-muted-foreground">2020.03 ~ 2026.02</p>
+                                        <p className="text-sm font-medium text-muted-foreground">컴퓨터정보과 (공학사)</p>
+                                        <p className="text-xs text-muted-foreground">2026.03 ~ 2027.02 (예정)</p>
                                     </div>
                                 </div>
                             </div>
@@ -328,6 +328,10 @@ export default function Component() {
                             <div>
                                 <h2 className="text-xl font-bold text-foreground mb-4 uppercase border-l-4 border-foreground pl-3">Certification</h2>
                                 <div className="space-y-3 text-sm border-t border-border pt-2 text-muted-foreground">
+                                    <div className="flex justify-between border-b border-border pb-1">
+                                        <span className="font-semibold text-foreground">SQLD</span>
+                                        <span>2025.08</span>
+                                    </div>
                                     <div className="flex justify-between border-b border-border pb-1">
                                         <span className="font-semibold text-foreground">정보처리산업기사</span>
                                         <span>2025.12</span>
